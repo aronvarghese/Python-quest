@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Quest – Practise. Solve. Level Up.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ═══════════════════════════════════════════════════════
+           RESET & DESIGN TOKENS
+           ═══════════════════════════════════════════════════════ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* Backgrounds */
+            --bg-primary:    #0a0e1a;
+            --bg-secondary:  #111827;
+            --bg-card:       #151c2c;
+            --bg-card-hover: #1a2236;
+            --border:        #1e293b;
+            --border-light:  #2a3550;
+
+            /* Accent colours */
+            --red-primary:   #ef4444;
+            --red-glow:      rgba(239, 68, 68, 0.25);
+            --green-primary: #22c55e;
+            --green-glow:    rgba(34, 197, 94, 0.20);
+            --yellow-primary:#facc15;
+            --blue-primary:  #3b82f6;
+            --purple-primary:#a855f7;
+            --orange-primary:#c86118;
+
+            /* Typography */
+            --text-primary:  #f1f5f9;
+            --text-secondary:#94a3b8;
+            --text-muted:    #64748b;
+
+            /* Radii */
+            --radius:        12px;
+            --radius-sm:     8px;
+            --radius-full:   9999px;
+
+            --shadow-glow:   0 0 30px rgba(239, 68, 68, 0.15);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { cursor: pointer; border: none; font-family: inherit; }
+        img { display: block; max-width: 100%; }
+
+        /* ═══════════════════════════════════════════════════════
+           NAVBAR
+           ═══════════════════════════════════════════════════════ */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            transition: background .3s;
+        }
+        .navbar.scrolled { background: rgba(10, 14, 26, 0.96); }
+
+        .navbar-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 800;
+            font-size: 1.25rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .logo .python { color: var(--green-primary); }
+        .logo .quest  { color: var(--red-primary); }
+        .logo-icon {
+            width: 28px; height: 28px;
+            background: var(--green-primary);
+            border-radius: 6px;
+            display: grid; place-items: center;
+            margin-right: 6px;
+            font-size: 14px;
+            color: #000;
+        }
+
+        /* Nav links */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+        }
+        .nav-links a {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            transition: color .2s, background .2s;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a.active { color: var(--red-primary); }
+
+        /* Search */
+        .nav-search {
+            flex: 0 1 280px;
+            position: relative;
+        }
+        .nav-search input {
+            width: 100%; height: 36px;
+            padding: 0 14px 0 36px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.8125rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .nav-search input::placeholder { color: var(--text-muted); }
+        .nav-search input:focus { border-color: var(--red-primary); }
+        .nav-search i {
+            position: absolute;
+            left: 12px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        /* Actions */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        /* ── Buttons (shared) ──────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            padding: 8px 20px;
+            transition: all .25s;
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { color: var(--text-primary); border-color: var(--border-light); }
+
+        .btn-primary {
+            background: var(--red-primary);
+            color: #fff;
+            box-shadow: 0 0 16px var(--red-glow);
+        }
+        .btn-primary:hover {
+            background: #dc2626;
+            box-shadow: 0 0 24px rgba(239,68,68,0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-green {
+            background: var(--green-primary);
+            color: #000;
+            font-weight: 700;
+        }
+        .btn-green:hover {
+            background: #16a34a;
+            box-shadow: 0 0 20px var(--green-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+        .btn-outline:hover {
+            border-color: var(--text-secondary);
+            background: rgba(255,255,255,0.04);
+        }
+
+        .btn-lg {
+            padding: 12px 28px;
+            font-size: 0.9375rem;
+            border-radius: var(--radius);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           HERO
+           ═══════════════════════════════════════════════════════ */
+        .hero {
+            padding-top: 64px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* atmospheric gradients */
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 70% 40%, rgba(239,68,68,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 20% 80%, rgba(34,197,94,0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.25);
+            color: var(--red-primary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: var(--radius-full);
+            margin-bottom: 24px;
+        }
+        .hero-badge i { font-size: 0.7rem; }
+
+        .hero-title {
+            font-size: clamp(3rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+        }
+        .hero-title .line     { display: block; }
+        .hero-title .line-red { color: var(--red-primary); }
+
+        .hero-desc {
+            font-size: 1.0625rem;
+            color: var(--text-secondary);
+            max-width: 520px;
+            margin-bottom: 36px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Hero illustration card */
+        .hero-visual {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-illustration {
+            width: 100%;
+            max-width: 560px;
+            aspect-ratio: 4 / 3;
+            border-radius: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            position: relative;
+            box-shadow:
+                0 20px 60px rgba(0,0,0,0.4),
+                var(--shadow-glow);
+        }
+
+        .hero-scene {
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #111827 0%, #0f172a 60%, #1a1028 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+        }
+
+        .scene-top-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .scene-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .scene-dot.red    { background: #ef4444; }
+        .scene-dot.yellow { background: #facc15; }
+        .scene-dot.green  { background: #22c55e; }
+
+        .scene-code {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            overflow: hidden;
+        }
+        .scene-code .keyword  { color: #c084fc; }
+        .scene-code .func     { color: #60a5fa; }
+        .scene-code .string   { color: #34d399; }
+        .scene-code .comment  { color: #475569; }
+        .scene-code .number   { color: #fb923c; }
+        .scene-code .builtin  { color: #fbbf24; }
+        .scene-code .operator { color: #f87171; }
+
+        /* Floating badges on the illustration */
+        .scene-float-badge {
+            position: absolute;
+            background: rgba(21,28,44,0.92);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+        }
+        .float-top    { top: 16px; right: -10px; color: var(--yellow-primary); }
+        .float-bottom { bottom: 20px; right: 10px; color: var(--green-primary); }
+        .float-left   { bottom: 50px; left: -16px; color: var(--blue-primary); }
+
+        .float-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: grid; place-items: center;
+            font-size: 0.875rem;
+        }
+        .float-icon.yellow { background: rgba(250,204,21,0.15); color: var(--yellow-primary); }
+        .float-icon.green  { background: rgba(34,197,94,0.15);  color: var(--green-primary); }
+        .float-icon.blue   { background: rgba(59,130,246,0.15); color: var(--blue-primary); }
+
+        /* ═══════════════════════════════════════════════════════
+           STATS STRIP
+           ═══════════════════════════════════════════════════════ */
+        .stats {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: rgba(17,24,39,0.5);
+            backdrop-filter: blur(8px);
+        }
+
+        .stats-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: grid; place-items: center;
+            font-size: 1.125rem;
+            margin-bottom: 4px;
+        }
+        .stat-icon.red    { background: rgba(239,68,68,0.15);  color: var(--red-primary); }
+        .stat-icon.green  { background: rgba(34,197,94,0.15);  color: var(--green-primary); }
+        .stat-icon.yellow { background: rgba(250,204,21,0.15); color: var(--yellow-primary); }
+        .stat-icon.blue   { background: rgba(59,130,246,0.15); color: var(--blue-primary); }
+
+        .stat-number { font-size: 2rem; font-weight: 800; line-height: 1.2; }
+        .stat-number .accent-red    { color: var(--red-primary); }
+        .stat-number .accent-green  { color: var(--green-primary); }
+        .stat-number .accent-yellow { color: var(--yellow-primary); }
+        .stat-number .accent-blue   { color: var(--blue-primary); }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           FEATURE CARDS
+           ═══════════════════════════════════════════════════════ */
+        .features {
+            padding: 80px 24px;
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+        .section-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--red-primary);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .section-sub {
+            color: var(--text-secondary);
+            max-width: 560px;
+            margin: 0 auto;
+            font-size: 1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            transition: transform .3s, border-color .3s, box-shadow .3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-light);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-card:nth-child(1)::before { background: var(--green-primary); }
+        .feature-card:nth-child(2)::before { background: var(--red-primary); }
+        .feature-card:nth-child(3)::before { background: var(--blue-primary); }
+        .feature-card:nth-child(4)::before { background: var(--yellow-primary); }
+
+        .feature-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: grid; place-items: center;
+            font-size: 1.125rem;
+            margin-bottom: 18px;
+        }
+        .feature-card:nth-child(1) .feature-icon { background: rgba(34,197,94,0.15);  color: var(--green-primary); }
+        .feature-card:nth-child(2) .feature-icon { background: rgba(239,68,68,0.15);  color: var(--red-primary); }
+        .feature-card:nth-child(3) .feature-icon { background: rgba(59,130,246,0.15); color: var(--blue-primary); }
+        .feature-card:nth-child(4) .feature-icon { background: rgba(250,204,21,0.15); color: var(--yellow-primary); }
+
+        .feature-title {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .feature-desc {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .feature-link {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: gap .2s;
+        }
+        .feature-card:nth-child(1) .feature-link { color: var(--green-primary); }
+        .feature-card:nth-child(2) .feature-link { color: var(--red-primary); }
+        .feature-card:nth-child(3) .feature-link { color: var(--blue-primary); }
+        .feature-card:nth-child(4) .feature-link { color: var(--yellow-primary); }
+        .feature-link:hover { gap: 10px; }
+
+        /* ═══════════════════════════════════════════════════════
+           FOOTER
+           ═══════════════════════════════════════════════════════ */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 32px 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           MOBILE MENU
+           ═══════════════════════════════════════════════════════ */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            padding: 4px;
+        }
+        .hamburger span {
+            display: block;
+            width: 22px; height: 2px;
+            background: var(--text-primary);
+            border-radius: 2px;
+            transition: transform .3s, opacity .3s;
+        }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* Mobile slide-out drawer */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 64px; left: 0; right: 0; bottom: 0;
+            background: rgba(10,14,26,0.97);
+            backdrop-filter: blur(20px);
+            z-index: 999;
+            padding: 32px 24px;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+            transition: color .2s;
+        }
+        .mobile-menu a:hover,
+        .mobile-menu a.active { color: var(--red-primary); }
+        .mobile-menu .mobile-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .mobile-menu .mobile-actions .btn { flex: 1; justify-content: center; }
+
+        /* ═══════════════════════════════════════════════════════
+           ANIMATIONS
+           ═══════════════════════════════════════════════════════ */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-8px); }
+        }
+        .float-top    { animation: float 4s ease-in-out infinite; }
+        .float-bottom { animation: float 5s ease-in-out infinite 0.5s; }
+        .float-left   { animation: float 4.5s ease-in-out infinite 1s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in {
+            opacity: 0;
+            animation: fadeInUp 0.7s ease forwards;
+        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+
+        /* Counter animation glow */
+        @keyframes countGlow {
+            0%   { text-shadow: none; }
+            50%  { text-shadow: 0 0 12px currentColor; }
+            100% { text-shadow: none; }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .hero-inner {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .hero-desc  { margin-left: auto; margin-right: auto; }
+            .hero-buttons { justify-content: center; }
+            .hero-visual { order: -1; }
+            .hero-illustration { max-width: 480px; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .nav-links, .nav-search { display: none; }
+            .hamburger { display: flex; }
+            .float-left, .float-top { display: none; }
+        }
+
+        @media (max-width: 640px) {
+            .hero-title { font-size: 2.5rem; }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .hero-illustration { max-width: 340px; }
+            .nav-actions { display: none; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ═══ Navbar ═══════════════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="#" class="logo">
+                <span class="logo-icon"><i class="fa-solid fa-terminal"></i></span>
+                <span class="python">Python</span><span class="quest">Quest</span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="#" class="active">Home</a></li>
+                <li><a href="#">Practice</a></li>
+                <li><a href="#">Challenge</a></li>
+                <li><a href="#">Achievements</a></li>
+                <li><a href="#">Progress</a></li>
+                <li><a href="#">About</a></li>
+            </ul>
+
+            <div class="nav-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search questions, hints...">
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-ghost">Login</button>
+                <button class="btn btn-primary">Sign Up</button>
+            </div>
+
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile menu drawer -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#" class="active">Home</a>
+        <a href="#">Practice</a>
+        <a href="#">Challenge</a>
+        <a href="#">Achievements</a>
+        <a href="#">Progress</a>
+        <a href="#">About</a>
+        <div class="mobile-actions">
+            <button class="btn btn-ghost btn-lg">Login</button>
+            <button class="btn btn-primary btn-lg">Sign Up</button>
+        </div>
+    </div>
+
+    <!-- ═══ Hero ════════════════════════════════════════════ -->
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-content">
+                <div class="hero-badge animate-in">
+                    <i class="fa-solid fa-bolt"></i>
+                    LEVEL UP YOUR PYTHON SKILLS
+                </div>
+
+                <h1 class="hero-title animate-in delay-1">
+                    <span class="line">PRACTISE.</span>
+                    <span class="line line-red">SOLVE.</span>
+                    <span class="line">LEVEL UP.</span>
+                </h1>
+
+                <p class="hero-desc animate-in delay-2">
+                    A gamified Python quiz platform to improve your programming skills, test your knowledge,
+                    and become a better problem solver.
+                </p>
+
+                <div class="hero-buttons animate-in delay-3">
+                    <button class="btn btn-green btn-lg">
+                        Get Started <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button class="btn btn-outline btn-lg">
+                        <i class="fa-solid fa-play"></i> Watch Demo
+                    </button>
+                </div>
+            </div>
+
+            <div class="hero-visual animate-in delay-2">
+                <div class="hero-illustration">
+                    <div class="hero-scene">
+                        <div class="scene-top-bar">
+                            <span class="scene-dot red"></span>
+                            <span class="scene-dot yellow"></span>
+                            <span class="scene-dot green"></span>
+                        </div>
+                        <div class="scene-code">
+                            <div><span class="comment"># Python Quest – Daily Challenge</span></div>
+                            <div><span class="keyword">class</span> <span class="func">PythonQuest</span>:</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">def</span> <span class="func">__init__</span>(<span class="builtin">self</span>):</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="builtin">self</span>.level <span class="operator">=</span> <span class="number">1</span></div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="builtin">self</span>.xp <span class="operator">=</span> <span class="number">0</span></div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="builtin">self</span>.streak <span class="operator">=</span> <span class="number">0</span></div>
+                            <div></div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">def</span> <span class="func">solve_challenge</span>(<span class="builtin">self</span>, answer):</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> answer <span class="operator">==</span> correct:</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="builtin">self</span>.xp <span class="operator">+=</span> <span class="number">50</span></div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="builtin">self</span>.streak <span class="operator">+=</span> <span class="number">1</span></div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="builtin">print</span>(<span class="string">"&#x1F389; Correct!"</span>)</div>
+                            <div></div>
+                            <div><span class="comment"># Start your journey today</span></div>
+                            <div>quest <span class="operator">=</span> <span class="func">PythonQuest</span>()</div>
+                            <div>quest.<span class="func">solve_challenge</span>(<span class="string">"level_up"</span>)</div>
+                        </div>
+                    </div>
+
+                    <!-- Floating badges -->
+                    <div class="scene-float-badge float-top">
+                        <div class="float-icon yellow"><i class="fa-solid fa-trophy"></i></div>
+                        <div>
+                            <div style="color: var(--text-primary); font-size: 0.8125rem;">A Better Version</div>
+                            <div style="color: var(--text-muted); font-size: 0.6875rem;">Of Me &middot; Level Up</div>
+                        </div>
+                    </div>
+
+                    <div class="scene-float-badge float-bottom">
+                        <div class="float-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                        <div>
+                            <div style="color: var(--green-primary); font-size: 0.875rem; font-weight: 700;">TODAY</div>
+                            <div style="color: var(--text-muted); font-size: 0.6875rem;">5 / 5 Completed</div>
+                        </div>
+                    </div>
+
+                    <div class="scene-float-badge float-left">
+                        <div class="float-icon blue"><i class="fa-solid fa-fire"></i></div>
+                        <div>
+                            <div style="color: var(--text-primary); font-size: 0.8125rem;">&#x1F525; 7-Day Streak</div>
+                            <div style="color: var(--text-muted); font-size: 0.6875rem;">Keep it going!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Stats ═══════════════════════════════════════════ -->
+    <section class="stats">
+        <div class="stats-inner">
+            <div class="stat-item animate-in delay-1">
+                <div class="stat-icon red"><i class="fa-solid fa-code"></i></div>
+                <div class="stat-number"><span data-target="1000">0</span><span class="accent-red">+</span></div>
+                <div class="stat-label">Practice Questions</div>
+            </div>
+            <div class="stat-item animate-in delay-2">
+                <div class="stat-icon green"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-number"><span data-target="10" data-suffix="K">0</span><span class="accent-green">+</span></div>
+                <div class="stat-label">Active Learners</div>
+            </div>
+            <div class="stat-item animate-in delay-3">
+                <div class="stat-icon yellow"><i class="fa-solid fa-medal"></i></div>
+                <div class="stat-number"><span data-target="50">0</span><span class="accent-yellow">+</span></div>
+                <div class="stat-label">Achievements</div>
+            </div>
+            <div class="stat-item animate-in delay-4">
+                <div class="stat-icon blue"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="stat-number" style="color: var(--blue-primary);"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="stat-label">Track Your Progress</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Features ════════════════════════════════════════ -->
+    <section class="features">
+        <div class="section-header">
+            <div class="section-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> WHY PYTHON QUEST</div>
+            <h2 class="section-title">Everything you need to master Python</h2>
+            <p class="section-sub">Four powerful modes designed to take you from beginner to Python pro.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Card 1 -->
+            <div class="feature-card animate-in delay-1">
+                <div class="feature-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                <h3 class="feature-title">Practice Mode</h3>
+                <p class="feature-desc">
+                    Choose a difficulty level and start practising Python questions at your own pace.
+                </p>
+                <a href="#" class="feature-link">
+                    Start Practising <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="feature-card animate-in delay-2">
+                <div class="feature-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+                <h3 class="feature-title">Challenge Mode</h3>
+                <p class="feature-desc">
+                    Test yourself with difficulty-based challenges and earn rewards as you advance.
+                </p>
+                <a href="#" class="feature-link">
+                    Take a Challenge <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="feature-card animate-in delay-3">
+                <div class="feature-icon"><i class="fa-solid fa-chart-column"></i></div>
+                <h3 class="feature-title">Track Progress</h3>
+                <p class="feature-desc">
+                    See your stats, accuracy, and improvement over time with beautiful analytics.
+                </p>
+                <a href="#" class="feature-link">
+                    View Progress <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="feature-card animate-in delay-4">
+                <div class="feature-icon"><i class="fa-solid fa-trophy"></i></div>
+                <h3 class="feature-title">Unlock Achievements</h3>
+                <p class="feature-desc">
+                    Complete milestones and earn exciting badges to showcase your Python mastery.
+                </p>
+                <a href="#" class="feature-link">
+                    View Achievements <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Footer ══════════════════════════════════════════ -->
+    <footer class="footer">
+        <p>&copy; 2026 PythonQuest. All rights reserved. Built with &#x2764;&#xFE0F; for Python learners.</p>
+    </footer>
+
+    <!-- ═══ JS ══════════════════════════════════════════════ -->
+    <script>
+        // ── Navbar scroll effect ──────────────────────────────
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        // ── Mobile menu toggle ────────────────────────────────
+        const hamburger = document.getElementById('hamburger');
+        const mobileMenu = document.getElementById('mobileMenu');
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            mobileMenu.classList.toggle('open');
+            document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+        });
+
+        // ── Animated number counters ──────────────────────────
+        const counters = document.querySelectorAll('[data-target]');
+        const observerOptions = { threshold: 0.5 };
+
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                const el = entry.target;
+                const target = +el.dataset.target;
+                const suffix = el.dataset.suffix || '';
+                const duration = 1600;
+                const start = performance.now();
+
+                const tick = (now) => {
+                    const progress = Math.min((now - start) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);   // ease-out cubic
+                    const current = Math.round(eased * target);
+                    el.textContent = current.toLocaleString() + suffix;
+                    if (progress < 1) requestAnimationFrame(tick);
+                };
+                requestAnimationFrame(tick);
+                counterObserver.unobserve(el);
+            });
+        }, observerOptions);
+
+        counters.forEach(c => counterObserver.observe(c));
+    </script>
+</body>
+</html>
