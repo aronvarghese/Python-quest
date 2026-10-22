@@ -1,53 +1,84 @@
+# -*- coding: utf-8 -*-
+"""
+Python Quest Backend - Application Entry Point
+Flask Application Factory with Database Lifecycle, CORS, and CLI Seeding.
+"""
 import os
 from flask import Flask, jsonify
-from config import Config
-from models import db
+from flask_cors import CORS
+from config import config_by_name
+from database import db
+from routes import register_blueprints
 from services.seed_service import seed_database
 
-# Import Blueprints
-from routes.auth_routes import auth_bp
-from routes.mode_routes import mode_bp
-from routes.level_routes import level_bp
-from routes.challenge_routes import challenge_bp
-from routes.mentor_routes import mentor_bp
+def create_app(config_name=None):
+    """Factory function to configure and initialize the Flask application."""
+    if not config_name:
+        config_name = os.environ.get("FLASK_ENV", "development")
 
-def create_app(config_class=Config):
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    app.config.from_object(config_by_name.get(config_name, config_by_name["development"]))
 
-    # Initialize extensions
+    # Setup Cross-Origin Resource Sharing (CORS)
+    CORS(app, supports_credentials=True)
+
+    # Initialize SQLAlchemy database
     db.init_app(app)
 
-    # Register blueprints
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(mode_bp)
-    app.register_blueprint(level_bp)
-    app.register_blueprint(challenge_bp)
-    app.register_blueprint(mentor_bp)
+    # Register API blueprints
+    register_blueprints(app)
 
-    @app.route('/')
-    def root():
+    # Health check route
+    @app.route("/", methods=["GET"])
+    @app.route("/api/health", methods=["GET"])
+    def health_check():
         return jsonify({
-            'platform': 'Python Quest API',
-            'version': '1.0.0',
-            'modes': ['beginner', 'intermediate', 'difficult'],
-            'total_levels': 300,
-            'status': 'Online'
+            "status": "online",
+            "platform": "Python Quest Backend",
+            "version": "1.0.0",
+            "modes_available": ["beginner", "intermediate", "difficult"],
+            "total_curriculum_levels": 300,
+            "architecture": "Flask + SQLite"
         })
 
-    @app.route('/api/health')
-    def health():
-        return jsonify({'status': 'healthy', 'database': 'connected'})
+    # Error Handlers
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return jsonify({
+            "success": False,
+            "error": "The requested endpoint was not found on this Python Quest server."
+        }), 404
 
-    # Initialize tables and seed questions
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return jsonify({
+            "success": False,
+            "error": "Internal server error occurred. Please contact the Python Quest mentor."
+        }), 500
+
+    # CLI Command to seed database
+    @app.cli.command("seed-db")
+    def seed_db_command():
+        """CLI Command: flask seed-db - Seeds all 300 levels and sample questions."""
+        with app.app_context():
+            db.create_all()
+            seed_database()
+            print("Python Quest 300-level database successfully seeded!")
+
+    # Auto-create tables & seed in development if database is empty
     with app.app_context():
         db.create_all()
-        seed_database()
+        # Seed automatically if no levels exist
+        from models import Level
+        if Level.query.count() == 0:
+            seed_database()
 
     return app
 
-if __name__ == '__main__':
-    app = create_app()
-    port = int(os.environ.get('PORT', 5000))
-    print(f"🎮 Python Quest Backend running at http://127.0.0.1:{port}")
-    app.run(host='0.0.0.0', port=port, debug=True)
+# WSGI Application object
+app = create_app()
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
+.
